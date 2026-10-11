@@ -1,6 +1,7 @@
 import type {
 	IDataObject,
 	IExecuteFunctions,
+	INode,
 	INodeExecutionData,
 	INodeProperties,
 	INodeType,
@@ -15,6 +16,20 @@ import {
 	toItems,
 	type RoutingMatchType,
 } from './GenericFunctions';
+
+/**
+ * Refuses a resource and operation pair the node does not know. This matters more than it looks: the
+ * dispatcher used to fall through to whichever branch came last, and for the domain resource that
+ * branch deletes a domain. An AI agent filling in a tool node can easily leave the operation unset, so
+ * a missing operation must raise instead of guessing at something destructive.
+ */
+function unknownOperation(node: INode, resource: string, operation: unknown): NodeOperationError {
+	return new NodeOperationError(
+		node,
+		`Unknown operation "${operation === undefined ? '(none set)' : String(operation)}" for the "${resource}" resource`,
+		{ description: 'Choose an operation on the node. Nothing was sent to Purelymail.' },
+	);
+}
 
 /** Some fields are booleans where "leave it alone" is a valid third choice, so they are tri-state. */
 const triStateOptions = [
@@ -678,12 +693,14 @@ export class Purelymail implements INodeType {
 							userHandle: this.getNodeParameter('userHandle', i) as string,
 							name: (this.getNodeParameter('label', i, '') as string) || '',
 						};
-					} else {
+					} else if (operation === 'deleteAppPassword') {
 						endpoint = 'deleteAppPassword';
 						body = {
 							userName: this.getNodeParameter('userNameFull', i) as string,
 							appPassword: this.getNodeParameter('appPassword', i) as string,
 						};
+					} else {
+						throw unknownOperation(this.getNode(), resource, operation);
 					}
 				} else if (resource === 'domain') {
 					if (operation === 'add') {
@@ -706,10 +723,12 @@ export class Purelymail implements INodeType {
 							name: this.getNodeParameter('domainNameNamed', i) as string,
 							...cleaned,
 						};
-					} else {
+					} else if (operation === 'delete') {
 						endpoint = 'deleteDomain';
 						// Purelymail takes `name` here and `domainName` on add, which their spec confirms.
 						body = { name: this.getNodeParameter('domainNameNamed', i) as string };
+					} else {
+						throw unknownOperation(this.getNode(), resource, operation);
 					}
 				} else if (resource === 'routing') {
 					if (operation === 'create') {
@@ -722,9 +741,11 @@ export class Purelymail implements INodeType {
 						});
 					} else if (operation === 'list') {
 						endpoint = 'listRoutingRules';
-					} else {
+					} else if (operation === 'delete') {
 						endpoint = 'deleteRoutingRule';
 						body = { routingRuleId: this.getNodeParameter('routingRuleId', i) as number };
+					} else {
+						throw unknownOperation(this.getNode(), resource, operation);
 					}
 				} else if (resource === 'passwordReset') {
 					if (operation === 'list') {
@@ -737,7 +758,7 @@ export class Purelymail implements INodeType {
 							userName: this.getNodeParameter('userNameFull', i) as string,
 							...(target === undefined ? {} : { target }),
 						};
-					} else {
+					} else if (operation === 'upsert') {
 						endpoint = 'upsertPasswordReset';
 						const options = this.getNodeParameter('resetOptions', i, {}) as IDataObject;
 						body = {
@@ -746,10 +767,17 @@ export class Purelymail implements INodeType {
 							target: this.getNodeParameter('resetTarget', i) as string,
 							...options,
 						};
+					} else {
+						throw unknownOperation(this.getNode(), resource, operation);
 					}
-				} else {
+				} else if (resource === 'billing' && (operation === undefined || operation === 'checkCredit')) {
+					// Billing has a single operation, so a node saved without one still means check credit,
+					// which is how this node arrived in a real workflow. Any other value is a mistake and is
+					// refused rather than guessed at. Listed calls only, so nothing here can change an account.
 					endpoint = 'checkAccountCredit';
 					primitiveKey = 'credit';
+				} else {
+					throw unknownOperation(this.getNode(), resource, operation);
 				}
 
 				const result = await purelymailRequest(this, endpoint, body);

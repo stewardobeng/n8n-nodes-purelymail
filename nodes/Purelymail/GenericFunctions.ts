@@ -112,7 +112,12 @@ export async function purelymailRequest(
 			method: 'POST',
 			url: buildApiUrl(endpoint),
 			headers: { 'Content-Type': 'application/json' },
-			body,
+			// Sent as a string deliberately. n8n drops an empty object body entirely, leaving
+			// `Content-Type: application/json` over no body at all, and Purelymail answers that with
+			// invalidRequest, "Request could not be parsed." Every parameterless call does this, so
+			// checkAccountCredit, getOwnershipCode, listUser and listRoutingRules all failed against a
+			// live account. Serialising here guarantees a parseable body is always present.
+			body: JSON.stringify(body),
 			json: true,
 		});
 	} catch (error) {

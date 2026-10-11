@@ -101,6 +101,30 @@ test('a successful request returns the payload inside result', async () => {
 	assert.deepEqual(await purelymailRequest(ctx, 'listUser', {}), { users: ['a@b.com', 'c@d.com'] });
 });
 
+test('a parameterless call still sends a parseable body', async () => {
+	// This is the bug that broke check credit on a live account. n8n drops an empty object body
+	// entirely, leaving `Content-Type: application/json` over no body at all, and Purelymail answers
+	// that with invalidRequest, "Request could not be parsed." So the body must never be an object
+	// here, empty or not: it has to go out as a string that survives n8n's serialisation.
+	const { ctx, calls } = fakeContext({ result: { credit: '12.34' } });
+	assert.deepEqual(await purelymailRequest(ctx, 'checkAccountCredit', {}), { credit: '12.34' });
+
+	assert.equal(
+		typeof calls[0].options.body,
+		'string',
+		'an object body is dropped by n8n when it is empty, so the transport must serialise it itself',
+	);
+	assert.equal(calls[0].options.body, '{}');
+	assert.equal(calls[0].options.headers['Content-Type'], 'application/json');
+});
+
+test('a filled body is serialised as JSON, not passed through as an object', async () => {
+	const { ctx, calls } = fakeContext({ result: {} });
+	await purelymailRequest(ctx, 'getUser', { userName: 'a@b.com' });
+	assert.equal(calls[0].options.body, '{"userName":"a@b.com"}');
+	assert.equal(JSON.parse(calls[0].options.body).userName, 'a@b.com');
+});
+
 test('an HTTP failure is reported with the status and the original reason', async () => {
 	const { ctx } = fakeContext(() => {
 		const error = new Error('Not Found');
