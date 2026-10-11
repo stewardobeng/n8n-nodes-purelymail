@@ -28,6 +28,11 @@ Self-hosted n8n only, because it is a community node.
 2. Select **Install** and enter `n8n-nodes-purelymail`.
 3. Restart n8n if prompted.
 
+More ways to install, including Docker and entirely offline from a tarball, are in
+[docs/INSTALL-OPTIONS.md](docs/INSTALL-OPTIONS.md). How releases work is in
+[docs/PUBLISHING.md](docs/PUBLISHING.md), and publishing from a Windows machine is in
+[docs/PUBLISH-FROM-WINDOWS.md](docs/PUBLISH-FROM-WINDOWS.md).
+
 ## Credential
 
 Create a **Purelymail API** credential and paste your API token. Get it from the Purelymail account
