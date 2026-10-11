@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "recipe": {
+    "name": "Node.js app",
+    "kind": "node",
+    "bootstrap": [
+      "npm install"
+    ],
+    "build": [
+      "npm run build"
+    ],
+    "test": [
+      "npm run test",
+      "npm run lint"
+    ],
+    "start": "bash test/manual/docker-load-verify.sh",
+    "port": 5701,
+    "readinessPath": "/healthz",
+    "evidence": [
+      "Detected package.json",
+      "Package manager: npm",
+      "Scripts: build, build:watch, dev, lint, lint:fix, test, prepublishOnly",
+      "Start phase boots a real n8n in Docker with this package installed and asserts n8n registers the Purelymail node and its tool variant, then serves health on port 5701. It needs docker only.",
+      "Nothing in the build, tests or start phase calls the live Purelymail API, so no token is needed here and no account is touched. The live checks live in test/manual/probe-endpoints.mjs and are run by hand, with the token supplied in the environment.",
+      "readinessPath is n8n's liveness endpoint /healthz. /healthz/readiness only turns 200 once the database is connected and migrated, and the start script itself waits for /healthz/readiness before installing the package.",
+      "Set PKG_SPEC=n8n-nodes-purelymail to make the start script install the published package by name from the registry instead of the locally packed tarball.",
+      "For build and test only, run: hermes verify --json --skip-start"
+    ]
+  },
+  "updatedAt": "2026-10-11T00:00:00+00:00"
+}

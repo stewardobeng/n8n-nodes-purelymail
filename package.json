@@ -1,0 +1,56 @@
+{
+	"name": "n8n-nodes-purelymail",
+	"version": "0.1.0",
+	"description": "n8n node for Purelymail: manage mailboxes, domains, routing rules, app passwords and account credit from a workflow.",
+	"keywords": [
+		"n8n-community-node-package",
+		"purelymail",
+		"email",
+		"mailbox",
+		"routing",
+		"email-hosting",
+		"automation"
+	],
+	"license": "MIT",
+	"homepage": "https://gitlab.com/steprotech/n8n-nodes-purelymail",
+	"author": {
+		"name": "Steward Obeng",
+		"email": "stewardobeng@gmail.com"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://gitlab.com/steprotech/n8n-nodes-purelymail.git"
+	},
+	"main": "index.js",
+	"scripts": {
+		"build": "n8n-node build",
+		"build:watch": "tsc --watch",
+		"dev": "n8n-node dev",
+		"lint": "n8n-node lint",
+		"lint:fix": "n8n-node lint --fix",
+		"test": "node --test test/*.test.mjs",
+		"prepublishOnly": "npm run build && npm run lint && npm test"
+	},
+	"files": [
+		"dist",
+		"!dist/tsconfig.tsbuildinfo"
+	],
+	"n8n": {
+		"n8nNodesApiVersion": 1,
+		"credentials": [
+			"dist/credentials/PurelymailApi.credentials.js"
+		],
+		"nodes": [
+			"dist/nodes/Purelymail/Purelymail.node.js"
+		]
+	},
+	"devDependencies": {
+		"@n8n/node-cli": "0.51.4",
+		"eslint": "9.39.4",
+		"prettier": "3.8.3",
+		"typescript": "5.9.3"
+	},
+	"peerDependencies": {
+		"n8n-workflow": "*"
+	}
+}
