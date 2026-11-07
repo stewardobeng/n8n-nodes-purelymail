@@ -12,14 +12,14 @@
 		"automation"
 	],
 	"license": "MIT",
-	"homepage": "https://gitlab.com/steprotech/n8n-nodes-purelymail",
+	"homepage": "https://github.com/SteProTech/n8n-nodes-purelymail",
 	"author": {
 		"name": "Steward Obeng",
 		"email": "stewardobeng@gmail.com"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://gitlab.com/steprotech/n8n-nodes-purelymail.git"
+		"url": "git+https://github.com/SteProTech/n8n-nodes-purelymail.git"
 	},
 	"main": "index.js",
 	"scripts": {
@@ -52,5 +52,8 @@
 	},
 	"peerDependencies": {
 		"n8n-workflow": "*"
+	},
+	"bugs": {
+		"url": "https://github.com/SteProTech/n8n-nodes-purelymail/issues"
 	}
 }
