@@ -782,7 +782,10 @@ export class Purelymail implements INodeType {
 
 				const result = await purelymailRequest(this, endpoint, body);
 
-				for (const item of toItems(result, primitiveKey)) {
+				const output = ['delete', 'deleteAppPassword'].includes(String(operation))
+					? [{ deleted: true }]
+					: toItems(result, primitiveKey);
+				for (const item of output) {
 					returnData.push({ json: item, pairedItem: { item: i } });
 				}
 			} catch (error) {

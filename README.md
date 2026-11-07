@@ -47,6 +47,9 @@ Never paste a token into a chat or a repository.
 
 ## Operations
 
+Successful delete operations return `{ "deleted": true }`. This replaces the previous
+service-specific response fields; workflows using those fields should be updated.
+
 **User**, meaning mailboxes
 
 - **Create**: name, domain, password, and optionally recovery methods, password reset, search indexing

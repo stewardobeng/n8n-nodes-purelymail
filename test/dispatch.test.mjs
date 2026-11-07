@@ -108,3 +108,12 @@ test('a rejected call surfaces Purelymail\u2019s code even though the HTTP statu
 		return true;
 	});
 });
+
+test('a successful delete returns the n8n confirmation, while a failed delete is rejected', async () => {
+	const params = { resource: 'domain', operation: 'delete', domainNameNamed: 'example.com' };
+	const success = run(params, { result: { message: 'removed' } });
+	assert.deepEqual(await success.promise, [[{ json: { deleted: true }, pairedItem: { item: 0 } }]]);
+	assert.match(success.calls[0].options.url, /deleteDomain$/);
+	const failure = run(params, { type: 'error', code: 'denied', message: 'Denied' });
+	await assert.rejects(failure.promise, /Denied/);
+});
