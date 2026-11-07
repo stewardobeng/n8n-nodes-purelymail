@@ -1,52 +1,30 @@
-# Publishing this node
+# Publishing n8n-nodes-purelymail
 
-## Do you need a GitHub account? No.
+The source repository is https://github.com/stewardobeng/n8n-nodes-purelymail. The package already exists on npm;
+published versions cannot be replaced. Publish a new version for each release.
 
-npm does not require GitHub. The GitLab CI job below uses **OpenID Connect and Sigstore**, so npm
-verifies that the package came from this repository on GitLab, not from GitHub. That matters here
-because Steward's GitHub account is suspended, and nothing in the publish path depends on it.
+For n8n Creator Portal verification, n8n requires publication from GitHub Actions with npm
+provenance. See https://docs.n8n.io/connect/create-nodes/deploy-your-node/submit-community-nodes.
+The repository's `.github/workflows/publish.yml` builds, lints and tests through the package's
+`prepublishOnly` script and publishes a matching `v`-prefixed version tag with provenance.
 
-## The package is unscoped, which makes this simple
+## One-time setup
 
-The name is `n8n-nodes-purelymail`, so there is no npm organisation to create, no scope and no
-`--access public` requirement. It is already published, maintained by `stewardobeng`.
+In npm package settings, add a GitHub Actions Trusted Publisher with owner `stewardobeng`,
+repository `n8n-nodes-purelymail`, and workflow filename `publish.yml`. Leave the environment
+blank and enable `npm publish` for direct releases. The GitHub account must be able to run Actions.
+The workflow uses OIDC and does not require a long-lived npm token.
 
-## Publishing a new version
+## Release
 
-Versions are immutable on npm and cannot be republished, so every change needs a new version number.
+1. Complete the n8n verification review, build, lint, tests and package scan. Check that GitHub's
+   Verify workflow succeeds and review any skipped live tests.
+2. Update the version in `package.json` and `package-lock.json`, commit the changes, and push them
+   to the `main` branch of https://github.com/stewardobeng/n8n-nodes-purelymail. Use a suitable version for any breaking changes.
+3. After confirming npm Trusted Publishing and GitHub Actions are available, create and push a tag
+   exactly matching the package version, for example `v1.2.3`. The push triggers publication.
+4. Check the GitHub Actions result, then verify the npm version, repository URL and provenance
+   attestation. An existing npm version cannot be overwritten.
 
-```bash
-npm version patch --no-git-tag-version   # or minor / major
-npm run build && npm run lint && npm test
-npm publish
-git add -A && git commit -m "..."  && git push
-```
-
-`prepublishOnly` already runs build, lint and tests, so a broken tree cannot be published even if you
-forget the middle step. The n8n starter ships `n8n-node prerelease` there instead, which refuses a
-plain `npm publish`; that guard was replaced deliberately.
-
-## Publishing through GitLab CI instead
-
-Tagging a commit makes the `publish` job available as a manual action, and it publishes with a
-**provenance statement** signed by Sigstore, which anyone can verify:
-
-```bash
-git tag v0.1.1 && git push origin v0.1.1
-```
-
-Set `NPM_TOKEN` in the project's CI/CD variables, masked and protected, holding an npm token with
-publish rights for this package. Never commit a token, and never paste one into a chat.
-
-## What actually ships
-
-Only `dist` is published, minus the TypeScript build cache, which keeps the tarball at about 18 kB
-across 17 files. `n8n-workflow` is a peer dependency and is not bundled, and there are no runtime
-dependencies at all.
-
-## Checking a published version
-
-```bash
-npm view n8n-nodes-purelymail version
-npm view n8n-nodes-purelymail dist.tarball
-```
+Publishing to npm and submission for n8n verification are separate actions. Local publication or
+GitLab CI publication may be valid for npm but does not meet n8n's GitHub Actions requirement.

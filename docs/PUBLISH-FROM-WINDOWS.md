@@ -1,3 +1,5 @@
+> **For n8n Creator Portal verification:** do not use local publishing instructions in this historical guide. Use the GitHub Actions process in [PUBLISHING.md](PUBLISHING.md) to publish with provenance.
+
 # Publishing from a Windows machine
 
 The package is built here but published from Windows, using the tarball. No SSH to this host and no
