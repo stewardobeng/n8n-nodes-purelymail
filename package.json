@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-purelymail",
-	"version": "0.1.1",
+	"version": "0.2.0",
 	"description": "n8n node for Purelymail: manage mailboxes, domains, routing rules, app passwords and account credit from a workflow.",
 	"keywords": [
 		"n8n-community-node-package",
