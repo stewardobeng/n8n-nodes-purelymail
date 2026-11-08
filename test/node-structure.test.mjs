@@ -111,10 +111,9 @@ test('the credential sends the Purelymail-Api-Token header', () => {
 	const token = credential.properties.find((p) => p.name === 'apiToken');
 	assert.equal(token.typeOptions.password, true, 'the token must be masked in the UI');
 
-	// Purelymail answers 200 for a bad key, so the credential warns that the test proves little.
-	const notice = credential.properties.find((p) => p.type === 'notice');
-	assert.ok(notice, 'the credential should say the connection test cannot prove the key');
-	assert.match(notice.displayName, /success even when/);
+	assert.equal(credential.test.request.url, '/api/v0/listUser');
+	assert.ok(credential.test.rules.some((rule) => rule.type === 'responseSuccessBody' &&
+		rule.properties.key === 'type' && rule.properties.value === 'error'));
 });
 
 test('the label field is not masked, because a label is not a secret', () => {

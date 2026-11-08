@@ -40,8 +40,7 @@ management page with **Refresh API Key**. It is sent as the `Purelymail-Api-Toke
 
 **Important, and unusual:** Purelymail answers with HTTP 200 even when a call fails, putting the error
 in the body as `{"type":"error","code":...,"message":...}`. The node checks that body and raises the
-real error, but n8n's built-in connection test only sees the status code, so a green test does not
-prove your key is right. Run any operation, such as Billing, Check Credit, to confirm it.
+real error. The credential test also checks the response body for errors.
 
 Never paste a token into a chat or a repository.
 
